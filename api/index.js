@@ -228,12 +228,12 @@ module.exports = async (req, res) => {
     },
     cached: false,
     proxyUsed: true,
-    api_developer: "@AkashExploits",
-    BUY_API: "@AkashExploits",
-    SUPPORT: "@AkashExploits",
-    owner: "https://t.me/AkashExploits \n BUY INSTANT CHEAP PRICE",
-    powered_by: "@AkashExploits",
-    source: "@AkashExploits"
+    api_developer: "@Akashishare",
+    BUY_API: "@Akashishare",
+    SUPPORT: "@Akashishare",
+    owner: "https://t.me/Akashishare \n BUY INSTANT CHEAP PRICE",
+    powered_by: "@Akashishare",
+    source: "@Akashishare"
   };
 
   return res.json(enrichedResponse);
