@@ -17,7 +17,7 @@ const YOUR_KEYS = {
     name: "Paid 30 Days Key",
     expiry_date: "2026-03-20",   // 30 दिन (आज 18 Feb से)
     status: "Active",
-    daily_limit: 999999,
+    daily_limit: 1000,
     used_today: 0,
     total_used: 0
   },
@@ -25,7 +25,7 @@ const YOUR_KEYS = {
     name: "Free Trial Key",
     expiry_date: "2026-02-20",   // 2 दिन
     status: "Active",
-    daily_limit: 999999,
+    daily_limit: 10,
     used_today: 0,
     total_used: 0
   }
