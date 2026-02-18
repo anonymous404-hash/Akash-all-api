@@ -1,0 +1,13 @@
+{
+  "name": "universal-proxy-api",
+  "version": "1.0.0",
+  "description": "Universal Proxy API with Failover & Branding",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}
