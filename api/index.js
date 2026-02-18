@@ -3,25 +3,39 @@
 
 // ==================== Configuration ====================
 
-// Your own API keys (internal)
+// Your own API keys (internal) – अब तीन कुंजियाँ
 const YOUR_KEYS = {
   "AKASH_PARMA": {
     name: "Premium Key",
     expiry_date: "2030-03-30",
-    days_remaining: 70,
     status: "Active",
-    daily_limit: 100,
+    daily_limit: 999999,         // असीमित (बहुत बड़ी संख्या)
     used_today: 0,
     total_used: 0
   },
-  // आप और keys जोड़ सकते हैं
+  "AKASH_PAID30DAYS": {
+    name: "Paid 30 Days Key",
+    expiry_date: "2026-03-20",   // 30 दिन (आज 18 Feb से)
+    status: "Active",
+    daily_limit: 999999,
+    used_today: 0,
+    total_used: 0
+  },
+  "AKASH_FREETRIAL": {
+    name: "Free Trial Key",
+    expiry_date: "2026-02-20",   // 2 दिन
+    status: "Active",
+    daily_limit: 999999,
+    used_today: 0,
+    total_used: 0
+  }
 };
 
-// External API keys (for Zephrex)
+// External API keys (for Zephrex) – वही रहेंगे
 const EXTERNAL_KEYS = {
   PHONE: [
-    { key: "ZEPH-7M7CD", priority: 1 },  // Primary (working)
-    { key: "ZEPH-QW2T3", priority: 2 }   // Secondary (fallback)
+    { key: "ZEPH-7M7CD", priority: 1 },
+    { key: "ZEPH-QW2T3", priority: 2 }
   ],
   FAMILY: [
     { key: "ZEPH-CYW71", priority: 1 }
@@ -58,24 +72,30 @@ function validatePhone(term) {
 }
 
 function validateUPI(term) {
-  // Basic UPI ID validation (e.g., something@okaxis)
   return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$/.test(term);
 }
 
 function validateTGNum(term) {
-  // Telegram numbers can be international, but we'll just check it's not empty
   return term && term.length > 0;
 }
 
-// Validate based on type
 function validateTerm(type, term) {
   switch(type.toUpperCase()) {
     case 'AADHAAR': return validateAadhaar(term);
     case 'PHONE': return validatePhone(term);
     case 'UPI': return validateUPI(term);
     case 'TG_NUM': return validateTGNum(term);
-    default: return true; // FAMILY etc. assume valid
+    default: return true;
   }
+}
+
+// दिनों की गणना करने का हेल्पर
+function getDaysRemaining(expiryDateStr) {
+  const today = new Date();
+  const expiry = new Date(expiryDateStr);
+  const diffTime = expiry - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays > 0 ? diffDays : 0;
 }
 
 // ==================== Main Handler ====================
@@ -106,7 +126,7 @@ module.exports = async (req, res) => {
     });
   }
 
-  // Validate term format based on type
+  // Validate term format
   if (!validateTerm(type, term)) {
     let errorMsg = 'Invalid term format';
     if (type.toUpperCase() === 'AADHAAR') errorMsg = 'Aadhaar must be 12 digits';
@@ -132,15 +152,15 @@ module.exports = async (req, res) => {
     });
   }
 
-  // Check daily limit
+  // Daily limit check – अब बहुत बड़ी लिमिट है, लेकिन फिर भी चेक करें
   if (keyData.used_today >= keyData.daily_limit) {
     return res.status(429).json({ 
       success: false, 
-      error: 'Daily limit exceeded' 
+      error: 'Daily limit exceeded (unlikely, but if you see this, contact support)' 
     });
   }
 
-  // Increment usage (we'll do it after successful fetch, but for simplicity we do it now)
+  // Increment usage
   keyData.used_today++;
   keyData.total_used++;
 
@@ -168,7 +188,7 @@ module.exports = async (req, res) => {
       if (response.ok) {
         responseData = await response.json();
         console.log(`[Proxy] Success with key ${extKey.key}`);
-        break; // Success, exit loop
+        break;
       } else {
         const errorText = await response.text();
         lastError = { status: response.status, body: errorText };
@@ -188,7 +208,7 @@ module.exports = async (req, res) => {
       details: lastError,
       key_details: {
         expiry_date: keyData.expiry_date,
-        days_remaining: keyData.days_remaining,
+        days_remaining: getDaysRemaining(keyData.expiry_date),
         status: keyData.status,
         used_today: keyData.used_today,
         remaining_today: keyData.daily_limit - keyData.used_today
@@ -201,7 +221,7 @@ module.exports = async (req, res) => {
     ...responseData,
     key_details: {
       expiry_date: keyData.expiry_date,
-      days_remaining: keyData.days_remaining,
+      days_remaining: getDaysRemaining(keyData.expiry_date),
       status: keyData.status,
       used_today: keyData.used_today,
       remaining_today: keyData.daily_limit - keyData.used_today
